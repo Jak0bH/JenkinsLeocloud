@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: student-j-hofer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      nodeName: godzilla
+      serviceAccountName: jenkins
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts-alpine
+          args: ["--prefix=/j.hofer/jenkins"]
+          ports:
+            - containerPort: 8080
+            - containerPort: 50000
+          volumeMounts:
+            - name: data
+              mountPath: /var/jenkins_home
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: jenkins-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-svc
+  namespace: student-j-hofer
+spec:
+  ports:
+    #- name: httpport
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+        #- name: jnlpport
+        #  port: 50000
+        #  targetPort: 50000
+        #  protocol: TCP
+  selector:
+    app: jenkins
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: student-j-hofer
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /j.hofer/jenkins$1
+spec:
+  rules:
+    - host: student.cloud.htl-leonding.ac.at
+      http:
+        paths:
+          - path: /j.hofer/jenkins(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkins-svc
+                port:
+                  number: 80
