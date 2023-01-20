@@ -15,7 +15,6 @@ spec:
       labels:
         app: jenkins
     spec:
-      nodeName: godzilla
       serviceAccountName: jenkins
       containers:
         - name: jenkins
