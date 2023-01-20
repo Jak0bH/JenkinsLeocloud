@@ -39,14 +39,14 @@ metadata:
   namespace: student-j-hofer
 spec:
   ports:
-    #- name: httpport
-    - port: 80
+    - name: httpport
+      port: 80
       targetPort: 8080
       protocol: TCP
-        #- name: jnlpport
-        #  port: 50000
-        #  targetPort: 50000
-        #  protocol: TCP
+    - name: jnlpport
+      port: 50000
+      targetPort: 50000
+      protocol: TCP
   selector:
     app: jenkins
 ---
